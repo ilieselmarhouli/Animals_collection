@@ -36,5 +36,5 @@ export async function updateDisplayName(
     uid: string,
     displayName: string,
 ): Promise<UserProfile> {
-    return { ...test_user, displayName: displayName.trim() };
+    return { ...test_user, uid, displayName: displayName.trim() };
 }
