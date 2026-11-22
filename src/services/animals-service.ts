@@ -1,4 +1,4 @@
-import { Animals , AnimalsFilter} from "@/models/animals";
+import { Animals } from "@/models/animals";
 
 const SITE_URL = "https://extinct-api.herokuapp.com/api/v1/animal/804";
 

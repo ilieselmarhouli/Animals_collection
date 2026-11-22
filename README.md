@@ -54,3 +54,47 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+## Public API
+
+The application uses Extinct API to retrieve information about extinct animals. It does not require a secret API key.
+
+Endpoint:
+https://extinct-api.herokuapp.com/api/v1/animal/804
+
+## Response Type
+
+The API returns JSON. The `data` property contains an array of animals.
+
+The TypeScript type includes only the fields used by the application:
+
+```ts
+type AnimalsResponse = {
+  binomialName: string;
+  commonName: string;
+  location: string;
+  wikiLink: string;
+  lastRecord: string;
+  imageSrc: string;
+  shortDesc: string;
+};
+
+type ApiResponse = {
+  data: AnimalsResponse[];
+};
+```
+
+The `status` and `results` properties are omitted because the application does not use them.
+
+## Data Fetching
+
+The `fetchAnimals()` function in `src/services/animals-service.ts`
+returns a promise containing an array of animals: `Promise<Animals[]>`.
+
+It checks the HTTP response status and throws an error if the request fails.
+
+## Error Handling Test
+
+An incorrect endpoint was temporarily used to trigger an HTTP 404 error.
+
+The message “Impossible de récupérer les animaux.” is displayed on the home screen when the request fails.
