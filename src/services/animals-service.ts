@@ -19,7 +19,11 @@ function toAnimal(response: AnimalsResponse): Animals {
         location: response.location,
         wikiLink: response.wikiLink,
         lastRecord: response.lastRecord,
-        imageSrc: response.imageSrc,
+        imageSrc: response.imageSrc.startsWith(
+        "https://upload.wikimedia.org/"
+          )
+            ? response.imageSrc.replace(/\/\d+px-/, "/500px-")
+            : response.imageSrc,
         shortDesc: response.shortDesc
     };
 }
