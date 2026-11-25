@@ -1,40 +1,44 @@
-import { LoginUser, RegisterUser, UserProfile } from "@/models/auth";
-//Before firebase tutorial
-const test_user: UserProfile = {
-    uid: "u1",
-    email: "alice@example.com",
-    displayName: "Alice Martin",
-    createdAt: 1735689600000,
-};
-
-const test_password = "alice123";
-
-export async function signIn(credentials: LoginUser): Promise<UserProfile> {
-    const email = credentials.email.trim().toLowerCase();
-
-    if (email !== test_user.email || credentials.password !== test_password) {
-        throw new Error("Email ou mot de passe incorrect.");
-    }
-
-    return test_user;
+import { FirebaseError } from "firebase/app";
+import {
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut as firebaseSignOut,
+  User,
+} from "firebase/auth";
+import { AppUser } from "@/models/user";
+import { auth } from "@/services/firebase";
+function toAppUser(user: User): AppUser {
+  return { uid: user.uid, email: user.email ?? "" };
 }
-
-export async function signUp(input: RegisterUser): Promise<UserProfile> {
-    return {
-        uid: `u${Date.now()}`,
-        email: input.email.trim().toLowerCase(),
-        displayName: input.displayName.trim(),
-        createdAt: Date.now(),
-    };
+export function subscribeToAuth(
+  onChange: (user: AppUser | null) => void,
+) {
+  return onAuthStateChanged(auth, (user) =>
+    onChange(user ? toAppUser(user) : null),
+  );
 }
-
-export async function signOut(): Promise<void> {}
-
-export async function sendPasswordReset(email: string): Promise<void> {}
-
-export async function updateDisplayName(
-    uid: string,
-    displayName: string,
-): Promise<UserProfile> {
-    return { ...test_user, uid, displayName: displayName.trim() };
+export async function signUp(email: string, password: string) {
+  await createUserWithEmailAndPassword(auth, email, password);
+}
+export async function signIn(email: string, password: string) {
+  await signInWithEmailAndPassword(auth, email, password);
+}
+export async function signOut() {
+  await firebaseSignOut(auth);
+}
+export function authErrorMessage(error: unknown): string {
+  const code = error instanceof FirebaseError ? error.code : "";
+  switch (code) {
+    case "auth/invalid-email":
+      return "Adresse e-mail invalide.";
+    case "auth/invalid-credential":
+      return "E-mail ou mot de passe incorrect.";
+    case "auth/email-already-in-use":
+      return "Un compte existe déjà avec cette adresse.";
+    case "auth/weak-password":
+      return "Mot de passe trop court : 6 caractères au moins.";
+    default:
+      return "Une erreur est survenue. Réessayez.";
+  }
 }
